@@ -30,6 +30,7 @@ Your directory structure should look like this:
 | assamble.sh
 | collect_files.sh
 | list_ids.sh
++- outputs
 +- osds
  +- osd1
  +- osd2
@@ -38,7 +39,7 @@ Your directory structure should look like this:
 
 ## Step 1: Collect files
 Quite easy:  
-`./collect_files.sh`
+`./collect_files.sh osds`
 
 This could take a bit longer. Depends on your mount strategy (local vs sshfs) and your network.
 
@@ -49,14 +50,15 @@ Use `list_ids.sh` to print all VM Images found in step 1.
 
 ## Step 2: Recover Image
 Now we have everything to reassemble an image. The parts belonging to a specific Image are known and listed in files stored in `file_lists`.  
-To restore an image you need **3** information:
+To restore an image you need **4** information:
 1. The name of the Image (`vms/vm-xyz-disk-n.id`)
-2. The size of the original image in Bytes. So when the VM disk was 32GB in total (not used space!), you should use **34359738368**.  
+2. the object size of the rbd, it is called 'order size' in rbd feature, it's value common to see 2M, 4M, 8M, you can use rbd info pool_name/rbd_name to see what the value is it
+3. The size of the original image in GB. So when the VM disk was 32GB in total (not used space!), you should use **32**.  
   **Important**: If you are unsure about the actual disk size, choose a size which is **larger**! You can add some Bytes, MBytes or GBytes just to be sure
-3. A destination folder. Just a folder with enough free space to store your image of the specified size. (e.g. `/mnt/sda`)
+4. A destination folder. Just a folder with enough free space to store your image of the specified size. (e.g. `outputs/`)
 
-Having these 3 information you can restore the image:  
-`./assemble.sh vms/vm-xyz-disk-n.id 34359738368 /mnt/sda`
+Having these 4 information you can restore the image:  
+`./assemble.sh vms/vm-xyz-disk-n.id 2 32 outputs/`
 
 This will process all parts of the image and write it to a single image file. After this you can mount this image and access data or just put it back to a new cluster. 
 
